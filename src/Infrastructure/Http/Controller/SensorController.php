@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Http\Controller;
 
+use App\Application\DTO\AlertDTO;
 use App\Application\Service\SensorService;
 use DateTime;
 use Doctrine\ORM\EntityNotFoundException;
@@ -81,7 +82,14 @@ final class SensorController
         }
         $alertDTOs = $this->sensorService->getAlerts(Uuid::fromString($uuid));
 
-        return new JsonResponse($alertDTOs, Response::HTTP_OK);
+        return new JsonResponse(
+            array_map(
+                function (AlertDTO $alertDTO) {
+                    return $alertDTO->toArray();
+                },
+                $alertDTOs
+            ), Response::HTTP_OK
+        );
     }
 
     /**
@@ -109,7 +117,7 @@ final class SensorController
                 new DateTime($time)
             );
 
-            return new JsonResponse($measurementDTO, Response::HTTP_OK);
+            return new JsonResponse($measurementDTO->toArray(), Response::HTTP_OK);
         } catch (Throwable $e) {
             return $this->errorResponse($e);
         }
@@ -131,7 +139,7 @@ final class SensorController
 
         try {
             $metricDTO = $this->sensorService->getSensorMetricsDTO(Uuid::fromString($uuid));
-            return new JsonResponse($metricDTO, Response::HTTP_OK);
+            return new JsonResponse($metricDTO->toArray(), Response::HTTP_OK);
         } catch (Throwable $e) {
             return $this->errorResponse($e);
         }
